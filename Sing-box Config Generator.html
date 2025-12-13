@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Генератор конфигурации для sing-box на роутере</title>
+<style>
+:root {
+  /* Светлая (Pastel) */
+  --bg: #f1e3e1;
+  --bg-elevated: #ffffff;
+  --fg: #222222;
+  --border: #d0c4c2;
+  --accent: #94b5fd;
+  --accent-soft: #dde7ff;
+  --muted: #666666;
+  --code-bg: #f9f5f4;
+
+  --btn-gen-bg: #94b5fd;
+  --btn-gen-border: #5b88f5;
+  --btn-copy-bg: #9df0b3;
+  --btn-copy-border: #52c070;
+  --btn-dl-bg: #ffd866;
+  --btn-dl-border: #e5b83a;
+
+  --io-height: 36rem;
+}
+
+/* Тёмная (Monokai Pro) */
+:root[data-theme="dark"] {
+  --bg: #2d2a2e;
+  --bg-elevated: #343135;
+  --fg: #f8f8f2;
+  --border: #555157;
+  --accent: #ffd866;
+  --accent-soft: #494247;
+  --muted: #a0a0a0;
+  --code-bg: #272822;
+
+  --btn-gen-bg: #78dce8;
+  --btn-gen-border: #56adbc;
+  --btn-copy-bg: #a9dc76;
+  --btn-copy-border: #86b42b;
+  --btn-dl-bg: #ff6188;
+  --btn-dl-border: #c4265e;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  max-width: 1200px;
+  margin: 1rem auto;
+  padding: 0 1rem 2rem;
+  background: var(--bg);
+  color: var(--fg);
+}
+
+h1 {
+  margin: 0.5rem 0 0.75rem;
+}
+
+textarea {
+  width: 100%;
+  box-sizing: border-box;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background: var(--code-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5rem;
+  resize: none;
+}
+
+input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg-elevated);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.35rem 0.5rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+}
+
+label {
+  font-weight: 600;
+  display: block;
+  margin-top: 1rem;
+}
+
+button {
+  margin-top: 0.5rem;
+  margin-right: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  color: var(--fg);
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.03);
+}
+
+.small {
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.card {
+  background: var(--bg-elevated);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  padding: 0.75rem 0.9rem;
+  margin-top: 0.75rem;
+}
+
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+}
+
+.flex-inline label {
+  margin-top: 0;
+  font-weight: 500;
+}
+
+.theme-toggle {
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.theme-toggle span {
+  font-size: 0.9rem;
+  color: var(--muted);
+}
+
+hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1rem 0;
+}
+
+/* Сетка ввода/вывода */
+.io-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  gap: 0.5rem 1rem;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .io-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.io-head { margin: 0; }
+
+.io-title { font-weight: 700; }
+
+.io-sub { margin-top: 0.15rem; }
+
+.io-text {
+  height: var(--io-height);
+  line-height: 1.25;
+}
+
+.io-wide { grid-column: 1 / -1; }
+
+.btn-gen {
+  background: var(--btn-gen-bg);
+  border-color: var(--btn-gen-border);
+}
+
+.btn-copy {
+  background: var(--btn-copy-bg);
+  border-color: var(--btn-copy-border);
+}
+
+.btn-dl {
+  background: var(--btn-dl-bg);
+  border-color: var(--btn-dl-border);
+}
+</style>
+</head>
+<body>
+<div class="flex theme-toggle">
+  <h1 id="title">Генератор конфигурации для sing-box на роутере</h1>
+  <div class="flex" style="gap:1rem;">
+    <div class="lang-toggle">
+      <span id="lang-label">Язык:</span>
+      <label class="flex-inline">
+        <input type="radio" name="lang" value="ru" checked>
+        русский
+      </label>
+      <label class="flex-inline">
+        <input type="radio" name="lang" value="en">
+        english
+      </label>
+    </div>
+    <div>
+      <span>Тема:</span>
+      <label class="flex-inline">
+        <input type="radio" name="theme" value="light">
+        светлая (Pastel)
+      </label>
+      <label class="flex-inline">
+        <input type="radio" name="theme" value="dark" checked>
+        тёмная (Monokai Pro)
+      </label>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="io-grid">
+    <!-- Заголовки -->
+    <div class="io-head">
+      <div class="io-title" id="links-title">Ссылки</div>
+      <div class="small io-sub" id="links-sub">
+        по одной в строке: vless://, vmess://, ss://, socks://, wireguard://, hysteria://
+      </div>
+    </div>
+    <div class="io-head">
+      <div class="io-title" id="result-title">Результат</div>
+      <div class="small io-sub" id="result-sub">config.json</div>
+    </div>
+
+    <!-- Поля -->
+    <textarea id="links" class="io-text"
+      placeholder="vless://...&#10;vmess://...&#10;ss://..."></textarea>
+    <textarea id="output" class="io-text" readonly></textarea>
+
+    <!-- Остальные настройки -->
+    <div class="io-wide">
+      <label for="ifname" id="ifname-label" style="margin-top:0.75rem;">
+        Имя интерфейса TUN (например: <code>singtun0</code> или <code>tun0:select,tun1:auto</code>):
+      </label>
+      <input id="ifname" type="text" value="singtun0">
+
+      <div class="small" id="ifname-help" style="margin-top:0.4rem;">
+        Если указать значение вида <code>tun0:select,tun1:auto</code>, в JSON будет использовано только
+        имя до двоеточия (<code>tun0</code>) как <code>interface_name</code>.
+      </div>
+
+      <hr>
+
+      <div class="small" id="tunmode-title" style="margin-bottom:0.25rem;">
+        Режим работы TUN (auto_route / strict_route):
+      </div>
+      <div class="card" style="margin-top:0.25rem; padding-top:0.5rem; padding-bottom:0.5rem;">
+        <div class="flex flex-inline">
+          <label id="tunmode-router-label">
+            <input type="radio" name="tunmode" value="router" checked>
+            <b>false / false</b> — для тоннеля на роутере (маршрутизация делается внешними правилами /
+            iptables / policy routing)
+          </label>
+        </div>
+        <div class="flex flex-inline" style="margin-top:0.35rem;">
+          <label id="tunmode-real-label">
+            <input type="radio" name="tunmode" value="real_iface">
+            <b>true / true</b> — для реального интерфейса (клиентский VPN: авто‑маршрутизация и
+            strict_route)
+          </label>
+        </div>
+      </div>
+
+      <div class="small" id="tunmode-help" style="margin-top:0.3rem;">
+        Для большинства сценариев на роутере выбирайте вариант «тоннель на роутере», а трафик пускайте
+        через <code>mixed</code> / правила маршрутизации. Режим «реальный интерфейс» обычно используют
+        на ПК/ноутбуке как обычный VPN‑клиент.
+      </div>
+
+      <div style="margin-top:0.75rem;">
+        <button id="generate" class="btn-gen">Сгенерировать config.json</button>
+        <button id="copy" class="btn-copy">Копировать</button>
+        <button id="download" class="btn-dl">Скачать config.json</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== i18n =====
+const i18n = {
+  ru: {
+    title: "Генератор конфигурации для sing-box на роутере",
+    langLabel: "Язык:",
+    linksTitle: "Ссылки",
+    linksSub: "по одной в строке: vless://, vmess://, ss://, socks://, wireguard://, hysteria://",
+    resultTitle: "Результат",
+    resultSub: "config.json",
+    linksPlaceholder: "vless://...\nvmess://...\nss://...",
+    ifnameLabel: 'Имя интерфейса TUN (например: <code>singtun0</code> или <code>tun0:select,tun1:auto</code>):',
+    ifnameHelp: 'Если указать значение вида <code>tun0:select,tun1:auto</code>, в JSON будет использовано только имя до двоеточия (<code>tun0</code>) как <code>interface_name</code>.',
+    tunmodeTitle: "Режим работы TUN (auto_route / strict_route):",
+    tunmodeRouter: "<b>false / false</b> — для тоннеля на роутере (маршрутизация делается внешними правилами / iptables / policy routing)",
+    tunmodeReal: "<b>true / true</b> — для реального интерфейса (клиентский VPN: авто‑маршрутизация и strict_route)",
+    tunmodeHelp: 'Для большинства сценариев на роутере выбирайте вариант «тоннель на роутере», а трафик пускайте через <code>mixed</code> / правила маршрутизации. Режим «реальный интерфейс» обычно используют на ПК/ноутбуке как обычный VPN‑клиент.',
+    btnGenerate: "Сгенерировать config.json",
+    btnCopy: "Копировать",
+    btnDownload: "Скачать config.json"
+  },
+  en: {
+    title: "sing-box configuration generator for router",
+    langLabel: "Language:",
+    linksTitle: "Links",
+    linksSub: "one per line: vless://, vmess://, ss://, socks://, wireguard://, hysteria://",
+    resultTitle: "Result",
+    resultSub: "config.json",
+    linksPlaceholder: "vless://...\nvmess://...\nss://...",
+    ifnameLabel: 'TUN interface name (e.g. <code>singtun0</code> or <code>tun0:select,tun1:auto</code>):',
+    ifnameHelp: 'If you set value like <code>tun0:select,tun1:auto</code>, only the part before colon (<code>tun0</code>) will be used as <code>interface_name</code> in JSON.',
+    tunmodeTitle: "TUN mode (auto_route / strict_route):",
+    tunmodeRouter: "<b>false / false</b> — for router tunnel (routing done by external rules / iptables / policy routing)",
+    tunmodeReal: "<b>true / true</b> — for real interface (client VPN: automatic routing and strict_route)",
+    tunmodeHelp: 'For most router scenarios choose “router tunnel” and send traffic via <code>mixed</code> / routing rules. The “real interface” mode is usually used on PC/laptop as a classic VPN client.',
+    btnGenerate: "Generate config.json",
+    btnCopy: "Copy",
+    btnDownload: "Download config.json"
+  }
+};
+
+function applyLang(lang) {
+  const t = i18n[lang] || i18n.ru;
+  document.documentElement.lang = lang === "en" ? "en" : "ru";
+  document.getElementById("title").textContent = t.title;
+  document.getElementById("lang-label").textContent = t.langLabel;
+  document.getElementById("links-title").textContent = t.linksTitle;
+  document.getElementById("links-sub").textContent = t.linksSub;
+  document.getElementById("result-title").textContent = t.resultTitle;
+  document.getElementById("result-sub").textContent = t.resultSub;
+  document.getElementById("links").placeholder = t.linksPlaceholder;
+  document.getElementById("ifname-label").innerHTML = t.ifnameLabel;
+  document.getElementById("ifname-help").innerHTML = t.ifnameHelp;
+  document.getElementById("tunmode-title").textContent = t.tunmodeTitle;
+
+  const routerChecked = document.querySelector('input[name="tunmode"][value="router"]').checked;
+  const realChecked = document.querySelector('input[name="tunmode"][value="real_iface"]').checked;
+
+  document.getElementById("tunmode-router-label").innerHTML =
+    '<input type="radio" name="tunmode" value="router"' +
+    (routerChecked ? ' checked' : '') + '> ' + t.tunmodeRouter;
+
+  document.getElementById("tunmode-real-label").innerHTML =
+    '<input type="radio" name="tunmode" value="real_iface"' +
+    (realChecked ? ' checked' : '') + '> ' + t.tunmodeReal;
+
+  document.getElementById("tunmode-help").innerHTML = t.tunmodeHelp;
+  document.getElementById("generate").textContent = t.btnGenerate;
+  document.getElementById("copy").textContent = t.btnCopy;
+  document.getElementById("download").textContent = t.btnDownload;
+
+  localStorage.setItem("sb_lang", lang);
+}
+
+(function initLang() {
+  const saved = localStorage.getItem("sb_lang") || "ru";
+  const radio = document.querySelector(`input[name="lang"][value="${saved}"]`);
+  if (radio) radio.checked = true;
+  applyLang(saved);
+
+  document.querySelectorAll('input[name="lang"]').forEach(r => {
+    r.addEventListener("change", () => applyLang(r.value));
+  });
+})();
+
+// ===== Тема (light / dark), по умолчанию тёмная =====
+(function initTheme() {
+  const root = document.documentElement;
+  const saved = localStorage.getItem("sb_theme");
+  const initial = saved || "dark";
+
+  if (initial === "dark") {
+    root.setAttribute("data-theme", "dark");
+    document.querySelector('input[name="theme"][value="dark"]').checked = true;
+  } else {
+    root.removeAttribute("data-theme");
+    document.querySelector('input[name="theme"][value="light"]').checked = true;
+  }
+
+  document.querySelectorAll('input[name="theme"]').forEach(r => {
+    r.addEventListener("change", () => {
+      const val = r.value;
+      if (val === "dark") {
+        root.setAttribute("data-theme", "dark");
+        localStorage.setItem("sb_theme", "dark");
+      } else {
+        root.removeAttribute("data-theme");
+        localStorage.setItem("sb_theme", "light");
+      }
+    });
+  });
+})();
+
+// ===== Парсер URL и генератор конфигурации (та самая рабочая версия) =====
+function safeParseURL(url) {
+  try { return new URL(url); } catch (e) { return null; }
+}
+
+function parseVmess(url) {
+  const u = url.trim();
+  const m = /^vmess:\/\/(.+)$/i.exec(u);
+  if (!m) return null;
+  let decoded;
+  try {
+    decoded = atob(m[1].replace(/-/g, '+').replace(/_/g, '/'));
+  } catch (e) { return null; }
+  let obj;
+  try { obj = JSON.parse(decoded); } catch (e) { return null; }
+  return {
+    type: "vmess",
+    tag: obj.ps || "vmess-out",
+    server: obj.add || "",
+    server_port: Number(obj.port) || 443,
+    uuid: obj.id || "",
+    security: obj.scy || obj.security || "auto",
+    alter_id: Number(obj.aid) || 0,
+    network: obj.net || "tcp",
+    tls: (obj.tls === "tls")
+  };
+}
+
+function parseVless(url) {
+  const u = safeParseURL(url);
+  if (!u) return null;
+  const tag = u.hash ? decodeURIComponent(u.hash.substring(1)) : "vless-out";
+  const user = u.username || "";
+  const server = u.hostname || "";
+  const port = Number(u.port) || 443;
+  const params = {};
+  u.searchParams.forEach((v, k) => { params[k] = v; });
+
+  const flow = params.flow || "";
+  const security = params.security || "";
+  const sni = params.sni || params.host || "";
+  const realityPbKey = params.pbk || "";
+  const realitySid = params.sid || "";
+
+  return {
+    type: "vless",
+    tag,
+    server,
+    server_port: port,
+    uuid: user,
+    flow,
+    tls: security === "tls" || security === "reality",
+    reality: security === "reality",
+    server_name: sni,
+    reality_public_key: realityPbKey,
+    reality_short_id: realitySid,
+    network: params.type || params.net || "tcp"
+  };
+}
+
+function parseShadowsocks(url) {
+  const u = url.trim();
+  const m = /^ss:\/\/(.+)$/i.exec(u);
+  if (!m) return null;
+  let main = m[1];
+  let tag = "ss-out";
+
+  const hashIndex = main.indexOf('#');
+  if (hashIndex !== -1) {
+    tag = decodeURIComponent(main.substring(hashIndex + 1)) || tag;
+    main = main.substring(0, hashIndex);
+  }
+
+  let decoded = main;
+  if (!decoded.includes('@')) {
+    try { decoded = atob(main.replace(/-/g, '+').replace(/_/g, '/')); }
+    catch (e) { return null; }
+  }
+
+  const re = /^([^:]+):([^@]+)@([^:]+):(\d+)$/;
+  const mm = re.exec(decoded);
+  if (!mm) return null;
+
+  return {
+    type: "shadowsocks",
+    tag,
+    method: mm[1],
+    password: mm[2],
+    server: mm[3],
+    server_port: Number(mm[4]) || 8388
+  };
+}
+
+function parseSocks(url) {
+  const u = safeParseURL(url);
+  if (!u) return null;
+  const tag = u.hash ? decodeURIComponent(u.hash.substring(1)) : "socks-out";
+  const user = u.username || "";
+  const pass = u.password || "";
+  return {
+    type: "socks",
+    tag,
+    server: u.hostname || "",
+    server_port: Number(u.port) || 1080,
+    username: user || undefined,
+    password: pass || undefined
+  };
+}
+
+function parseWireguard(url) {
+  const u = safeParseURL(url);
+  if (!u) return null;
+  const tag = u.hash ? decodeURIComponent(u.hash.substring(1)) : "wg-out";
+  const pubkey = u.username || "";
+  const server = u.hostname || "";
+  const port = Number(u.port) || 51820;
+  const params = {};
+  u.searchParams.forEach((v, k) => { params[k] = v; });
+
+  return {
+    type: "wireguard",
+    tag,
+    server,
+    server_port: port,
+    local_address: params.ip || params.local_ip || "",
+    private_key: params.privkey || params.private_key || "",
+    peer_public_key: pubkey || params.pubkey || params.public_key || "",
+    preshared_key: params.psk || "",
+    allowed_ips: params.allowed_ips || "0.0.0.0/0,::/0",
+    mtu: params.mtu ? Number(params.mtu) : undefined,
+    reserved: params.reserved || undefined
+  };
+}
+
+function parseHysteria(url) {
+  const u = safeParseURL(url);
+  if (!u) return null;
+  const tag = u.hash ? decodeURIComponent(u.hash.substring(1)) : "hysteria-out";
+  const server = u.hostname || "";
+  const port = Number(u.port) || 443;
+  const params = {};
+  u.searchParams.forEach((v, k) => { params[k] = v; });
+
+  return {
+    type: "hysteria",
+    tag,
+    server,
+    server_port: port,
+    protocol: params.protocol || "udp",
+    auth: params.auth || params.password || "",
+    obfs: params.obfs || "",
+    obfs_password: params.obfs_password || "",
+    sni: params.sni || params.host || ""
+  };
+}
+
+function outboundFromParsed(p) {
+  switch (p.type) {
+    case "vmess":
+      return {
+        type: "vmess",
+        tag: p.tag,
+        server: p.server,
+        server_port: p.server_port,
+        uuid: p.uuid,
+        security: p.security,
+        alter_id: p.alter_id,
+        transport: { type: p.network },
+        tls: p.tls ? { enabled: true } : undefined
+      };
+    case "vless":
+      return {
+        type: "vless",
+        tag: p.tag,
+        server: p.server,
+        server_port: p.server_port,
+        uuid: p.uuid,
+        flow: p.flow || undefined,
+        tls: {
+          enabled: p.tls || p.reality || false,
+          server_name: p.server_name || undefined,
+          reality: p.reality ? {
+            enabled: true,
+            public_key: p.reality_public_key || "",
+            short_id: p.reality_short_id || ""
+          } : undefined,
+          utls: { enabled: true, fingerprint: "chrome" }
+        }
+      };
+    case "shadowsocks":
+      return {
+        type: "shadowsocks",
+        tag: p.tag,
+        server: p.server,
+        server_port: p.server_port,
+        method: p.method,
+        password: p.password
+      };
+    case "socks":
+      return {
+        type: "socks",
+        tag: p.tag,
+        server: p.server,
+        server_port: p.server_port,
+        username: p.username,
+        password: p.password
+      };
+    case "wireguard":
+      return {
+        type: "wireguard",
+        tag: p.tag,
+        server: p.server,
+        server_port: p.server_port,
+        local_address: p.local_address ? p.local_address.split(',') : [],
+        private_key: p.private_key,
+        peers: [
+          {
+            server_public_key: p.peer_public_key,
+            preshared_key: p.preshared_key || "",
+            allowed_ips: p.allowed_ips ? p.allowed_ips.split(',') : ["0.0.0.0/0", "::/0"]
+          }
+        ],
+        mtu: p.mtu,
+        reserved: p.reserved
+      };
+    case "hysteria":
+      return {
+        type: "hysteria",
+        tag: p.tag,
+        server: p.server,
+        server_port: p.server_port,
+        protocol: p.protocol,
+        auth: p.auth,
+        obfs: p.obfs ? { type: p.obfs, password: p.obfs_password || "" } : undefined,
+        tls: { enabled: true, server_name: p.sni || undefined }
+      };
+    default:
+      return null;
+  }
+}
+
+document.getElementById('generate').addEventListener('click', function () {
+  const raw = document.getElementById('links').value.trim();
+  const ifnameRaw = document.getElementById('ifname').value.trim() || "singtun0";
+
+  let interfaceName = ifnameRaw;
+  const colonIdx = ifnameRaw.indexOf(':');
+  if (colonIdx !== -1) interfaceName = ifnameRaw.substring(0, colonIdx);
+
+  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+
+  const outbounds = [];
+  const errors = [];
+
+  lines.forEach((line, idx) => {
+    const lower = line.toLowerCase();
+    let parsed = null;
+
+    if (lower.startsWith("vmess://")) parsed = parseVmess(line);
+    else if (lower.startsWith("vless://")) parsed = parseVless(line);
+    else if (lower.startsWith("ss://")) parsed = parseShadowsocks(line);
+    else if (lower.startsWith("socks://") || lower.startsWith("socks5://") || lower.startsWith("socks4://")) parsed = parseSocks(line);
+    else if (lower.startsWith("wireguard://") || lower.startsWith("wg://")) parsed = parseWireguard(line);
+    else if (lower.startsWith("hysteria://") || lower.startsWith("hy://") || lower.startsWith("hysteria2://") || lower.startsWith("hy2://")) parsed = parseHysteria(line);
+    else errors.push("Строка " + (idx + 1) + ": неизвестная схема " + line);
+
+    if (parsed) {
+      const ob = outboundFromParsed(parsed);
+      if (ob) outbounds.push(ob);
+      else errors.push("Строка " + (idx + 1) + ": не удалось преобразовать в outbound");
+    } else if (
+      lower.startsWith("vmess://") ||
+      lower.startsWith("vless://") ||
+      lower.startsWith("ss://") ||
+      lower.startsWith("socks://") ||
+      lower.startsWith("socks5://") ||
+      lower.startsWith("socks4://") ||
+      lower.startsWith("wireguard://") ||
+      lower.startsWith("wg://") ||
+      lower.startsWith("hysteria://") ||
+      lower.startsWith("hy://") ||
+      lower.startsWith("hysteria2://") ||
+      lower.startsWith("hy2://")
+    ) {
+      errors.push("Строка " + (idx + 1) + ": не удалось разобрать ссылку");
+    }
+  });
+
+  const proxyTags = outbounds.map(o => o.tag).filter(Boolean);
+
+  // auto = URLTEST (совместимо с твоей версией sing-box)
+  const autoOutbound = {
+    type: "urltest",
+    tag: "auto",
+    outbounds: proxyTags.length ? proxyTags : [],
+    url: "https://www.gstatic.com/generate_204",
+    interval: "3m",
+    tolerance: 50,
+    idle_timeout: "30m",
+    interrupt_exist_connections: false
+  };
+
+  const selectorOutbound = {
+    type: "selector",
+    tag: "select",
+    outbounds: ["auto"].concat(proxyTags),
+    "default": "auto",
+    interrupt_exist_connections: false
+  };
+
+  const directOutbound = { tag: "direct", type: "direct" };
+  const blockOutbound  = { tag: "block",  type: "block"  };
+
+  const tunMode = document.querySelector('input[name="tunmode"]:checked').value;
+  const useAutoRoute = tunMode === "real_iface";
+
+  const config = {
+    log: { level: "info" },
+    inbounds: [
+      {
+        type: "tun",
+        tag: "tun-in",
+        interface_name: interfaceName,
+        address: ["172.19.0.1/32"],
+        stack: "gvisor",
+        auto_route: useAutoRoute,
+        strict_route: useAutoRoute,
+        sniff: true
+      },
+      {
+        tag: "mixed-in",
+        type: "mixed",
+        listen: "127.0.0.1",
+        listen_port: 2080
+      }
+    ],
+    outbounds: [autoOutbound, selectorOutbound].concat(outbounds).concat([directOutbound, blockOutbound]),
+    route: {
+      rules: [{ ip_version: 6, outbound: "block" }],
+      final: "select",
+      auto_detect_interface: true
+    },
+    experimental: {
+      cache_file: { enabled: true },
+      clash_api: {
+        external_controller: "[::]:9090",
+        external_ui: "ui",
+        external_ui_download_detour: "direct",
+        access_control_allow_private_network: true,
+        secret: ""
+      }
+    }
+  };
+
+  if (errors.length) config._errors = errors;
+
+  document.getElementById('output').value = JSON.stringify(config, null, 2);
+});
+
+document.getElementById('copy').addEventListener('click', function () {
+  const out = document.getElementById('output');
+  out.select();
+  out.setSelectionRange(0, out.value.length);
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(out.value).catch(function () {});
+  } else {
+    document.execCommand('copy');
+  }
+});
+
+document.getElementById('download').addEventListener('click', function () {
+  const text = document.getElementById('output').value || "{}";
+  const blob = new Blob([text], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = "config.json";
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
