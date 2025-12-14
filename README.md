@@ -1,2 +1,2 @@
 # Sing-box-generator
-Sing-box Configuration Generator
+Standalone Sing-box configuration generator. Download the file, open it in your browser and paste conenction links.
